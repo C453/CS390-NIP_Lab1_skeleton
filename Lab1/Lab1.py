@@ -15,8 +15,8 @@ tf.random.set_seed(1618)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #ALGORITHM = "guesser"
-ALGORITHM = "tf_net"
-#ALGORITHM = "tf_conv"
+#ALGORITHM = "tf_net"
+ALGORITHM = "tf_conv"
 
 DATASET = "mnist_d"
 #DATASET = "mnist_f"
@@ -37,12 +37,23 @@ elif DATASET == "mnist_f":
     IZ = 1
     IS = 784
 elif DATASET == "cifar_10":
-    pass                                 # TODO: Add this case.
+    NUM_CLASSES = 10
+    IH = 32
+    IW = 32
+    IZ = 3
+    IS = 1024
 elif DATASET == "cifar_100_f":
-    pass                                 # TODO: Add this case.
+    NUM_CLASSES = 100
+    IH = 32
+    IW = 32
+    IZ = 3
+    IS = 1024
 elif DATASET == "cifar_100_c":
-    pass                                 # TODO: Add this case.
-
+    NUM_CLASSES = 100
+    IH = 32
+    IW = 32
+    IZ = 3
+    IS = 1024
 
 #=========================<Classifier Functions>================================
 
@@ -61,12 +72,20 @@ def buildTFNeuralNet(x, y, eps = 6):
     model.add(tf.keras.layers.Dense(512, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
     model.compile(optimizer="adam", loss=tf.keras.losses.CategoricalCrossentropy(), metrics=['accuracy'])
-    model.fit(x, y, epochs=eps, use_multiprocessing=True)
+    model.fit(x, y, epochs=eps)
     return model
 
 def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
-    pass        #TODO: Implement a CNN here. dropout option is required.
-    return None
+    model = tf.keras.models.Sequential()
+    model.add(tf.keras.layers.Conv2D(64, kernel_size=3, activation=tf.nn.relu, input_shape=(IW, IH, IZ)))
+    model.add(tf.keras.layers.Conv2D(32, kernel_size=3, activation=tf.nn.relu))
+    model.add(tf.keras.layers.MaxPooling2D())
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dropout(dropRate))
+    model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
+    model.compile(optimizer="adam", loss=tf.keras.losses.CategoricalCrossentropy(), metrics=['accuracy'])
+    model.fit(x, y, epochs=eps)
+    return model
 
 #=========================<Pipeline Functions>==================================
 
@@ -78,11 +97,14 @@ def getRawData():
         mnist = tf.keras.datasets.fashion_mnist
         (xTrain, yTrain), (xTest, yTest) = mnist.load_data()
     elif DATASET == "cifar_10":
-        pass      # TODO: Add this case.
+        cifar = tf.keras.datasets.cifar10
+        (xTrain, yTrain), (xTest, yTest) = cifar.load_data()
     elif DATASET == "cifar_100_f":
-        pass      # TODO: Add this case.
+        cifar = tf.keras.datasets.cifar100
+        (xTrain, yTrain), (xTest, yTest) = cifar.load_data(label_mode='fine')
     elif DATASET == "cifar_100_c":
-        pass      # TODO: Add this case.
+        cifar = tf.keras.datasets.cifar100
+        (xTrain, yTrain), (xTest, yTest) = cifar.load_data(label_mode='coarse')
     else:
         raise ValueError("Dataset not recognized.")
     print("Dataset: %s" % DATASET)
