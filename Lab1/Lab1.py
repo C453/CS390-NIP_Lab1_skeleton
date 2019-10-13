@@ -9,13 +9,13 @@ import random
 
 random.seed(1618)
 np.random.seed(1618)
-tf.set_random_seed(1618)
+tf.random.set_seed(1618)
 
-tf.logging.set_verbosity(tf.logging.ERROR)
+# tf.logging.set_verbosity(tf.logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-ALGORITHM = "guesser"
-#ALGORITHM = "tf_net"
+#ALGORITHM = "guesser"
+ALGORITHM = "tf_net"
 #ALGORITHM = "tf_conv"
 
 DATASET = "mnist_d"
@@ -56,9 +56,13 @@ def guesserClassifier(xTest):
 
 
 def buildTFNeuralNet(x, y, eps = 6):
-    pass        #TODO: Implement a standard ANN here.
-    return None
-
+    model = tf.keras.models.Sequential()
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(512, activation=tf.nn.relu))
+    model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
+    model.compile(optimizer="adam", loss=tf.keras.losses.CategoricalCrossentropy(), metrics=['accuracy'])
+    model.fit(x, y, epochs=eps, use_multiprocessing=True)
+    return model
 
 def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
     pass        #TODO: Implement a CNN here. dropout option is required.
